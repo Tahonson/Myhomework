@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block content %}
+    <h1>{{ title }}</h1>
+    <h2>Пользователи</h2>
+    <table class="table table-bordered">
+        <tr>
+            <th>Пользователь(логин)</th>
+            <th>Имя</th>
+            <th>Телефон</th>
+
+        </tr>
+<<<<<<< HEAD
+        {% for row in email %}
+=======
+        {% for row in users %}
+>>>>>>> eebd6cf9292b44db3e52f9ba706eab7e83df1856
+        <tr>
+            <td>{{ row.email }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.phone }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endblock %}
+</head>
+<body>
+
+</body>
+</html>
