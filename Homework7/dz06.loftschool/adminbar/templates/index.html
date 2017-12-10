@@ -5,20 +5,37 @@
     {% block content %}
     <h1>{{ title }}</h1>
     <h2>Пользователи</h2>
-    <table class="table table-bordered">
+    <table class="table table-bordered" border='1px' style=' width: 100%;  padding: 10px; top: 40px; right: -70px;   '>
+        <caption>Таблица заказов</caption>
         <tr>
-            <th>Пользователь(логин)</th>
-            <th>Имя</th>
-            <th>Телефон</th>
+            <td>номер заказа</td>
+            <td>id</td>
+            <td>Улица</td>
+            <td>Дом</td>
+            <td>Корпус</td>
+            <td>Квартира</td>
+            <td>Этаж</td>
+            <td>Пожелания</td>
+            <td>Оплата</td>
+            <td>Перезвонить(1/0)</td>
 
         </tr>
-        {% for row in users %}
+        {% for row in orders %}
         <tr>
-            <td>{{ row.email }}</td>
-            <td>{{ row.name }}</td>
-            <td>{{ row.phone }}</td>
+
+            <td>{{ row.id }}</td>
+            <td>{{ row.user_id }}</td>
+            <td>{{ row.street }}</td>
+            <td>{{ row.home }}</td>
+            <td>{{ row.part }}</td>
+            <td>{{ row.appt }}</td>
+            <td>{{ row.floor }}</td>
+            <td>{{ row.comment }}</td>
+            <td>{{ row.payment }}</td>
+            <td>{{ row.callback }}</td>
         </tr>
         {% endfor %}
+
     </table>
     {% endblock %}
 </head>
@@ -26,3 +43,38 @@
 
 </body>
 </html>
+
+<form method='POST' action="/adminbar/index.php">
+    <table class="table table-bordered" border='1px' style=' width: 50%;  padding: 5px; top: 20px; right: -70px;   '>
+        <p>Изменить заказ:<br>
+            <tr>
+                <td>номер заказа</td>
+                <td>id</td>
+                <td>Улица</td>
+                <td>Дом</td>
+                <td>Корпус</td>
+                <td>Квартира</td>
+                <td>Этаж</td>
+                <td>Пожелания</td>
+                <td>Оплата</td>
+                <td>Перезвонить(1/0)</td>
+                <td>Редактирование</td>
+            </tr>
+            {% for row in orders %}
+            <tr>
+                <td><input type='text' required pattern="[0-9]{1,50}" name='id' value='{{ row.id }} ' disabled/></td>
+                <td><input type='text' required pattern="[0-9]{1,50}" name='user_id' value='{{ row.user_id }}' disabled/></td>
+                <td><input type='text' name='street' value='{{ row.street }}'/></td>
+                <td><input type='text' name='home' value='{{ row.home }}'/></td>
+                <td><input type='text' name='part' value='{{ row.part }}'/></td>
+                <td><input type='text' name='appt' value='{{ row.appt }}'/></td>
+                <td> <input type='text' name='floor' value='{{ row.floor }}'/></td>
+                <td><input type='text' name='comment' value='{{ row.comment }}'/></td>
+                <td><input type='text' required pattern="^[a-zA-Z]+$" name='payment' value='{{ row.payment }}'/></td>
+                <td><input type='text' required pattern="\d [0-1]" name='callback' value='{{ row.callback }}'/></td>
+                <td><a href="/adminbar/change.php?id={{ row.id }}">изменить пользователя</a></td>
+        </tr>
+            {% endfor %}
+    </table>
+</form>
+

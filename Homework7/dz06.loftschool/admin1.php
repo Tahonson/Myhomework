@@ -4,6 +4,10 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 require_once "init.php";
 
+$loader = new \Twig_Loader_Filesystem('templates');
+$twig = new \Twig_Environment($loader, array(
+    'cache' => false));
+
 $order_table = Capsule::table('orders')->get();
 
 $print_order = "<html><head><body>";

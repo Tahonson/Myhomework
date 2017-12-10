@@ -5,9 +5,10 @@ namespace App;
 require_once 'init.php';
 
 use Intervention\Image\ImageManagerStatic as Image;
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Illuminate\Database\Eloquent\Model;
 
+
+require_once 'user.php';
+require_once 'order.php';
 
 $email = $_POST['email'];
 $name = $_POST['name'];
@@ -18,44 +19,7 @@ $part = $_POST['part'];
 $appt = $_POST['appt'];
 $floor = $_POST['floor'];
 $comment = $_POST['comment'];
-$file = $_FILES['photo'];
 
-// попытка
-//class User extends Model
-//{
-//
-//    protected $fillable = ['email', 'name', 'phone', 'ip'];
-//
-//    public static function firstOrNewId()
-//    {
-//
-//        $id = self::firstOrNew(['email' => $_POST['email']], // как получить доступ к таблице users
-//            ['phone' => $_POST['email']],
-//            ['name' => $_POST['name']],
-//            ['ip' => $_SERVER['REMOTE_ADDR']]);
-//
-//        $id->name = $_POST['name'];
-//        $id->phone = $_POST['phone'];
-//        $id->ip = $_SERVER['REMOTE_ADDR'];
-//
-//        $file_ext = strtolower(pathinfo($_FILES['name'], PATHINFO_EXTENSION));
-//        $img_ext = ['jpeg', 'png', 'jpg', 'gif'];
-//        $destination = "photos";
-//        if (!in_array($file_ext, $img_ext)) {
-//            die('Загружено не изображение');
-//        } else {
-//            $img = Image:: make($_FILES['image']['tmp_name']);
-//            $img->fit(480,480);
-//            $img->save($destination/$_POST['phone'].'.jpg',"60");
-//        }
-//        $id->image = "images/".$_POST['phone'].".jpg";
-//        $id->save;
-//        return $id->id;
-//    }
-//}
-
-
-// попытка
 
 if (($_POST['payment']) == 'cash') {
     $payment = 'cash';
@@ -63,74 +27,46 @@ if (($_POST['payment']) == 'cash') {
 
 if (isset($_POST['callback']) && $_POST['callback'] == 'on') {
     $callback = false;
+
 } else $callback = true;
 
 $ip = $_SERVER['REMOTE_ADDR'];
 
+$file_ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+$img_ext = ['jpeg', 'png', 'jpg', 'gif'];
+$destination = "photos";
 
-if ($email) {
-//вытаскиваем полностью зарегистрированного юзера , если он есть.
-    $user = Capsule::table('users')->where('email', '=', $email)->get();
-// проверка на существование
-    if (count($user)) {
-// в случае, если существует - вытаскиваем id;
-        $user_id = $user->get('id');  // вытащить id пользователя из базы
+$photo_name = str_replace(".", "", $_POST['email']);
 
 
-    } else {
-        $file_name = "file_user_" . "[$phone]" . ".jpg";
-        $file_ext = strtolower(pathinfo($_FILES['name'], PATHINFO_EXTENSION));
-        $img_ext = ['jpeg', 'png', 'jpg', 'gif'];
-        $destination = "photos";
-        if (!in_array($file_ext, $img_ext)) {
-            die('Загружено не изображение');
-        } else {
-            $img = Image:: make($_FILES['image']['tmp_name']);
-            $img->fit(480,480);
-            $img->save($destination/$_POST['phone'].'.jpg',"60");
-        }
-
-
-            Capsule::table('users')->insert([
-                'email' => $email,
-                'name' => $name,
-                'phone' => $phone,
-                'image' => $file_name,
-                'ip' => $ip
-            ]);
-
-        $try_id = Capsule::table('users')->where('email', '=', $email)->get();
-        $user_id = $try_id->get('id');
-
-            Capsule::table('orders')->insert([
-                'user_id' => $user_id,
-                'street' => $street,
-                'home' => $home,
-                'part' => $appt,
-                'appt' => $appt,
-                'floor' => $floor,
-                'comment' => $comment,
-                'payment' => $payment,
-                'callback' => $callback
-            ]);
-
-            echo " новый пользователь создан";
-
-    }
+if (!in_array($file_ext, $img_ext)) {
+    die('Загружено не изображение');
 } else {
-    die (" Не полностью заполнена форма<a href=\" / \">Вернуться обратно</a>");
+    $img = Image:: make($_FILES['photo']['tmp_name']);
+    $img->fit(480, 480);
+
+
+    $image = $photo_name . ".jpg";;
+    $img->save("$destination / $image", "60");
 }
 
 
-// достаем номер заказа и количество заказов этого пользователя
+$id = User::getIdByEmail($email);
 
+if ($id) {
 
-    $try_order_id = Capsule::table('orders')->where('user_id', '=', $user_id)->get();
-    $count_order = $try_order_id->count();
-    $order_id = Capsule::table('orders')->where('user_id','=',$user_id)->find($count_order);
+    $order_id = Order::AddOrder($street, $home, $part, $appt, $floor, $comment, $payment, $callback, $id);
+    //сохраняем order
 
+} else {
 
-//N-й заказ user'a.
+    $id = User::AddUser($email, $name, $phone, $ip, $image);
+
+    $order_id = Order::AddOrder($street, $home, $part, $appt, $floor, $comment, $payment, $callback, $id);
+
+}
+
+$count_order = Order::CountOrder($order_id);
 
 
 //письмо
@@ -147,9 +83,6 @@ $order_data .= "<b>Заказ:</b> DarkBeefBurger за 500 рублей, 1 шт<
 $order_data .= "<p>" . "Спасибо, это Ваш " . $count_order . " заказ." . "</p>";
 $order_data .= "<p>" . $date . "</p>";
 $order_data .= "</body></head></html>";
-
-
-
 
 // письмо на почту
 
@@ -196,6 +129,88 @@ if ($resp->isSuccess()) {
     echo "<a href=\" / \">Вернуться обратно</a>";
 
 }
+//    public static function firstOrNewId($email,$name,$phone,$ip,$image)
+//    {
+//
+//
+//        $id = self::firstOrNew(['email' => $_POST['email']], // как получить доступ к таблице users
+//            ['phone' => $_POST['email']],
+//            ['name' => $_POST['name']],
+//            ['ip' => $_SERVER['REMOTE_ADDR']]);
+//
+//        $id->;
+//        $id->;
+//        $id->;
+//
+//
+//        $id->image = "images/".$_POST['phone'].".jpg";
+//        $id->save;
+//        return $id->id;
+//    }
+
+
+//if ($email) {
+////вытаскиваем полностью зарегистрированного юзера , если он есть.
+//    $user = Capsule::table('users')->where('email', '=', $email)->get();
+//// проверка на существование
+//    if (count($user)) {
+//// в случае, если существует - вытаскиваем id;
+//        $user_id = $user->get('id');  // вытащить id пользователя из базы
+//
+//
+//    } else {
+//        $file_name = "file_user_" . "[$phone]" . ".jpg";
+//        $file_ext = strtolower(pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION));
+//        $img_ext = ['jpeg', 'png', 'jpg', 'gif'];
+//        $destination = "photos";
+//        if (!in_array($file_ext, $img_ext)) {
+//            die('Загружено не изображение');
+//        } else {
+//            $img = Image:: make($_FILES['image']['tmp_name']);
+//            $img->fit(480,480);
+//            $img->save($destination/$_POST['phone'].'.jpg',"60");
+//        }
+//
+//
+//            Capsule::table('users')->insert([
+//                'email' => $email,
+//                'name' => $name,
+//                'phone' => $phone,
+//                'image' => $file_name,
+//                'ip' => $ip
+//            ]);
+//
+//        $try_id = Capsule::table('users')->where('email', '=', $email)->get();
+//        $user_id = $try_id->get('id');
+//
+//            Capsule::table('orders')->insert([
+//                'user_id' => $user_id,
+//                'street' => $street,
+//                'home' => $home,
+//                'part' => $appt,
+//                'appt' => $appt,
+//                'floor' => $floor,
+//                'comment' => $comment,
+//                'payment' => $payment,
+//                'callback' => $callback
+//            ]);
+//
+//            echo " новый пользователь создан";
+//
+//    }
+//} else {
+//    die (" Не полностью заполнена форма<a href=\" / \">Вернуться обратно</a>");
+//}
+//
+//
+//// достаем номер заказа и количество заказов этого пользователя
+//
+//
+//    $try_order_id = Capsule::table('orders')->where('user_id', '=', $user_id)->get();
+//    $count_order = $try_order_id->count();
+//    $order_id = Capsule::table('orders')->where('user_id','=',$user_id)->find($count_order);
+
+
 
 
 

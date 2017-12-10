@@ -9,7 +9,7 @@ $order_table = mysqli_fetch_all($order_table);
 
 $print_users = "<html><head><body>";
 $print_users .= "<table border='1px' style=\" width: 30%;padding: 10px;padding-right: 20px;   float: left; top: 40px; left: -70px; \">";
-$print_users .= "<caption>Таблица зарегистрированных пользователей<br>  <a href=\" / \">Вернуться обратно</a> <br> <a href=\" admin1.php \">Cоздать свой заказ</a></caption>";
+$print_users .= "<caption>Таблица зарегистрированных пользователей<br>  <a href=\" / \">Вернуться обратно</a> <br> <a href=\" adminbar/index.php \">Cоздать свой заказ</a></caption>";
 
 foreach ($users_table as $value) {
     $print_users .= "<tr>";
