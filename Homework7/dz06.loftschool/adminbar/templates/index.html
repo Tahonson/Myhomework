@@ -44,7 +44,7 @@
 </body>
 </html>
 
-<form method='POST' action="/adminbar/index.php">
+
     <table class="table table-bordered" border='1px' style=' width: 50%;  padding: 5px; top: 20px; right: -70px;   '>
         <p>Изменить заказ:<br>
             <tr>
@@ -61,6 +61,8 @@
                 <td>Редактирование</td>
             </tr>
             {% for row in orders %}
+
+        <form method='POST' action="/adminbar/change.php?id={{ row.id }}">
             <tr>
                 <td><input type='text' required pattern="[0-9]{1,50}" name='id' value='{{ row.id }} ' disabled/></td>
                 <td><input type='text' required pattern="[0-9]{1,50}" name='user_id' value='{{ row.user_id }}' disabled/></td>
@@ -71,10 +73,12 @@
                 <td> <input type='text' name='floor' value='{{ row.floor }}'/></td>
                 <td><input type='text' name='comment' value='{{ row.comment }}'/></td>
                 <td><input type='text' required pattern="^[a-zA-Z]+$" name='payment' value='{{ row.payment }}'/></td>
-                <td><input type='text' required pattern="\d [0-1]" name='callback' value='{{ row.callback }}'/></td>
-                <td><a href="/adminbar/change.php?id={{ row.id }}">изменить пользователя</a></td>
+                <td><input type='text'  name='callback' value='{{ row.callback }}'/></td>
+                <td><<input type="submit" value="Внести изменения"></td>
         </tr>
+        </form>
+
             {% endfor %}
     </table>
-</form>
+
 
