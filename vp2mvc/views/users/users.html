@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block content %}
+    <h1>{{ title }}</h1>
+    <h2>Пользователи</h2>
+    <table class="table table-bordered" border='1px' style=' width: 100%;  padding: 10px; top: 40px; right: -70px;   '>
+        <caption>Таблица пользователей</caption>
+        <tr>
+            <td>Пользователь</td>
+            <td>Имя</td>
+            <td>Возраст</td>
+            <td>Описание</td>
+            <td>Фотография</td>
+
+        </tr>
+        {% for row in users %}
+        <tr>
+
+            <td>{{ row.user }}</td>
+            <td>{{ row.name }}</td>
+            <td>{{ row.age }}</td>
+            <td>{{ row.description }}</td>
+            <td>{{ row.photo }}</td>
+
+        </tr>
+        {% endfor %}
+
+    </table>
+    {% endblock %}
+</head>
+<body>
+
+</body>
+</html>
